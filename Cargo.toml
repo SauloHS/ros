@@ -7,8 +7,6 @@ name = "ros"
 version = "0.1.0"
 edition = "2024"
 
-[dependencies]
-bootloader = "0.11"
-
 [build-dependencies]
+bootloader = "0.11"
 kernel = { path = "kernel", artifact = "bin", target = "x86_64-unknown-none" }

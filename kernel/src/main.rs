@@ -1,21 +1,24 @@
 #![no_std]
 #![no_main]
 
+mod drivers;
+
+use drivers::video::framebuffer::Writer;
 use bootloader_api::{entry_point, BootInfo};
 use core::panic::PanicInfo;
 
 entry_point!(kernel_main);
 
-static HELLO: &[u8] = b"Hello, World!";
+fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
+    if let Some(framebuffer) = boot_info.framebuffer.as_mut() {
+        let info = framebuffer.info();
+        let buffer = framebuffer.buffer_mut();
 
-fn kernel_main(_boot_info: &'static mut BootInfo) -> ! {
-    let vga_buffer = 0xb8000 as *mut u8;
-    for (i, &byte) in HELLO.iter().enumerate() {
-        unsafe {
-            *vga_buffer.offset(i as isize * 2) = byte;
-            *vga_buffer.offset(i as isize * 2 + 1) = 0xb;
+        for byte in buffer.iter_mut() {
+            *byte = 0xff;
         }
     }
+
     loop {}
 }
 
