@@ -1,5 +1,5 @@
 [package]
-name = "os"
+name = "ros"
 version = "0.1.0"
 edition = "2024"
 
@@ -8,5 +8,10 @@ panic = "abort"
 
 [profile.release]
 panic = "abort"
+
+[[bin]]
+name = "ros"
+test = false
+bench = false
 
 [dependencies]
