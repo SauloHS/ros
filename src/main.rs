@@ -1,14 +1,8 @@
-#![no_std]
-#![no_main]
+fn main() {
+    let bios_path = env!("BIOS_PATH");
 
-use core::panic::PanicInfo;
-
-#[panic_handler]
-fn panic(_info: &PanicInfo) -> ! {
-    loop {}
+    let mut cmd = std::process::Command::new("qemu-system-x86_64");
+    cmd.arg("-drive").arg(format!("format=raw,file={bios_path}"));
+    let status = cmd.status().unwrap();
+    std::process::exit(status.code().unwrap_or(-1));
 }
-
-#[unsafe(no_mangle)]
-pub extern "C" fn _start() -> ! {
-    loop {}
-} 
