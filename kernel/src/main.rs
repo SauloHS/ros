@@ -24,6 +24,7 @@ fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
         drivers::video::framebuffer::init(buffer, info);
     }
     init::init();
+    
     println!("ROS");
 
     loop {}
