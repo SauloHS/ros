@@ -29,7 +29,18 @@ Pull requests are going to be reviewed, and possibly, merged.
 Development
 ===========
 You can clone this repo with `git clone https://github.com/SauloHS/ros`.
+
+Dependencies
+------------
+Rust toolchain and components
+You need rustc 1.98.0-nightly 2026-06-20 to build the kernel.
+You also need rust-src and llvm-tools components to build the kernel. Add them with `rustup component add rust-src llvm-tools`.
+
+Bare-metal Target
+Run `rustup target add x86_64-unknown-none` to set the target.
+
 To run and open QEMU, run `cargo run`. To build only, without opening QEMU, run `cargo build`.
+
 
 Project tree
 ============
@@ -37,5 +48,5 @@ src/main.rs          # Runs QEMU
 kernel/* # Main kernel files
 kernel/drivers/* # Hardware drivers
 
-Last edited by Saulo Henrique at June, 21st.
+Last edited by Saulo Henrique at June 22nd, 2026.
 
