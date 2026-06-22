@@ -25,4 +25,4 @@ pub struct Writer {
 
 impl Writer {
     pub fn new(framebuffer: &'static)
-}
+} 
