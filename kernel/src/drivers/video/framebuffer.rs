@@ -22,3 +22,7 @@ pub struct Writer {
     x_pos: usize,
     y_pos: usize,
 }
+
+impl Writer {
+    pub fn new(framebuffer: &'static)
+}
