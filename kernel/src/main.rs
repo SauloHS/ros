@@ -5,8 +5,11 @@ See LICENSE file for licensing information */
 
 #![no_std]
 #![no_main]
+#![feature(abi_x86_interrupt)]
 
 mod drivers;
+mod interrupts;
+mod init;
 
 use bootloader_api::{entry_point, BootInfo};
 use core::panic::PanicInfo;
@@ -19,13 +22,16 @@ fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
         let buffer = framebuffer.buffer_mut();
         drivers::video::framebuffer::init(buffer, info);
     }
+    init::init();
+    x86_64::instructions::interrupts::int3();
 
-    println!("Hello, World!");
+    println!("ROS");
 
     loop {}
 }
 
 #[panic_handler]
-fn panic(_info: &PanicInfo) -> ! {
+fn panic(info: &PanicInfo) -> ! {
+    println!("{}", info);
     loop {}
 } 
