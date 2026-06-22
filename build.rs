@@ -1,3 +1,8 @@
+/*
+File created by Saulo Henrique Santos Dorotéio.
+Last updated by Saulo Henrique Santos Dorotéio, at 06/22/2026.
+See LICENSE file for licensing information */
+
 use std::{env, path::PathBuf};
 
 fn main() {
@@ -11,4 +16,4 @@ fn main() {
         .unwrap();
 
     println!("cargo:rustc-env=BIOS_PATH={}", bios_path.display());
-}
+} 

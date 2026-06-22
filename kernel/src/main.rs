@@ -1,3 +1,8 @@
+/*
+File created by Saulo Henrique Santos Dorotéio.
+Last updated by Saulo Henrique Santos Dorotéio, at 06/22/2026.
+See LICENSE file for licensing information */
+
 #![no_std]
 #![no_main]
 
@@ -25,4 +30,4 @@ fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
 #[panic_handler]
 fn panic(_info: &PanicInfo) -> ! {
     loop {}
-}
+} 

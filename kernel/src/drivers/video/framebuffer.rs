@@ -1,3 +1,8 @@
+/*
+File created by Saulo Henrique Santos Dorotéio.
+Last updated by Saulo Henrique Santos Dorotéio, at 06/22/2026.
+See LICENSE file for licensing information */
+
 use bootloader_api::info::{FrameBufferInfo, PixelFormat};
 use core::fmt;
 use noto_sans_mono_bitmap::{get_raster, get_raster_width, FontWeight, RasterHeight, RasterizedChar};
@@ -25,4 +30,4 @@ pub struct Writer {
 
 impl Writer {
     pub fn new(framebuffer: &'static)
-} 
+}  
