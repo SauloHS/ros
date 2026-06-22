@@ -10,6 +10,7 @@ See LICENSE file for licensing information */
 mod drivers;
 mod interrupts;
 mod init;
+mod gdt;
 
 use bootloader_api::{entry_point, BootInfo};
 use core::panic::PanicInfo;
@@ -23,8 +24,6 @@ fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
         drivers::video::framebuffer::init(buffer, info);
     }
     init::init();
-    x86_64::instructions::interrupts::int3();
-
     println!("ROS");
 
     loop {}
