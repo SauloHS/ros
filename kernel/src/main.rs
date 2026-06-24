@@ -17,9 +17,13 @@ mod init;
 mod interrupts;
 mod memory;
 
-use crate::memory::active_level_4_table;
 use crate::init::{hlt_loop, init};
-use bootloader_api::{BootInfo, entry_point, config::{BootloaderConfig, Mapping}};
+use crate::memory::active_level_4_table;
+use bootloader_api::{
+    BootInfo,
+    config::{BootloaderConfig, Mapping},
+    entry_point,
+};
 use core::panic::PanicInfo;
 use x86_64::VirtAddr;
 
@@ -41,9 +45,10 @@ fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
     println!("ROS");
 
     let phys_mem_offset = VirtAddr::new(
-        boot_info.physical_memory_offset
+        boot_info
+            .physical_memory_offset
             .into_option()
-            .expect("physical memory offset missing")
+            .expect("physical memory offset missing"),
     );
     let l4_table = unsafe { active_level_4_table(phys_mem_offset) };
 
@@ -51,7 +56,6 @@ fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
         use x86_64::structures::paging::PageTable;
         if !entry.is_unused() {
             println!("L4 Entry {}: {:?}", i, entry);
-
         }
     }
 
