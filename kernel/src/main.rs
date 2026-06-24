@@ -1,3 +1,12 @@
+/*
+ * ROS Kernel
+ *
+ * Copyright (c) 2026 Saulo Henrique Santos Dorotéio
+ *
+ * This file is part of ROS.
+ * See the LICENSE file in the project root for licensing information.
+ */
+
 #![no_std]
 #![no_main]
 #![feature(abi_x86_interrupt)]
@@ -22,7 +31,7 @@ fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
     
     println!("ROS");
 
-    loop {}
+    loop {} 
 }
 
 #[panic_handler]

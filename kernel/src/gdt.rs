@@ -1,7 +1,11 @@
 /*
-File created by Saulo Henrique Santos Dorotéio.
-Last updated by Saulo Henrique Santos Dorotéio, at 06/22/2026.
-See LICENSE file for licensing information */
+ * ROS Kernel
+ *
+ * Copyright (c) 2026 Saulo Henrique Santos Dorotéio
+ *
+ * This file is part of ROS.
+ * See the LICENSE file in the project root for licensing information.
+ */
 
 use x86_64::VirtAddr;
 use x86_64::structures::tss::TaskStateSegment;
@@ -19,7 +23,7 @@ lazy_static! {
 
             let stack_start = VirtAddr::from_ptr(&raw const STACK);
             let stack_end = stack_start + STACK_SIZE as u64;
-            stack_end
+            stack_end 
         };
         tss
     };

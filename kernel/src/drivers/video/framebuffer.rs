@@ -1,3 +1,12 @@
+/*
+ * ROS Kernel
+ *
+ * Copyright (c) 2026 Saulo Henrique Santos Dorotéio
+ *
+ * This file is part of ROS.
+ * See the LICENSE file in the project root for licensing information.
+ */
+
 use bootloader_api::info::{FrameBufferInfo, PixelFormat};
 use core::fmt;
 use noto_sans_mono_bitmap::{get_raster, get_raster_width, FontWeight, RasterHeight, RasterizedChar};
@@ -12,7 +21,7 @@ const LINE_SPACING: usize = 2;
 const LETTER_SPACING: usize = 0;
 const BORDER_PADDING: usize = 1;
 
-fn get_char_raster(c: char) -> RasterizedChar {
+fn get_char_raster(c: char) -> RasterizedChar { 
     fn get(c: char) -> Option<RasterizedChar> {
         get_raster(c, FONT_WEIGHT, CHAR_RASTER_HEIGHT)
     }

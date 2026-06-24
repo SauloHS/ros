@@ -1,3 +1,12 @@
+/*
+ * ROS Kernel
+ *
+ * Copyright (c) 2026 Saulo Henrique Santos Dorotéio
+ *
+ * This file is part of ROS.
+ * See the LICENSE file in the project root for licensing information.
+ */
+
 use x86_64::structures::idt::InterruptDescriptorTable;
 use x86_64::structures::idt::InterruptStackFrame;
 use lazy_static::lazy_static;
@@ -11,7 +20,7 @@ pub const PIC_1_OFFSET: u8 = 32;
 pub const PIC_2_OFFSET: u8 = PIC_1_OFFSET + 8;
 pub static PICS: Mutex<ChainedPics> = 
     spin::Mutex::new(unsafe { ChainedPics::new(PIC_1_OFFSET, PIC_2_OFFSET) });
-const TIMER_INDEX: u8 = PIC_1_OFFSET;
+const TIMER_INDEX: u8 = PIC_1_OFFSET; 
 
 lazy_static! {
     static ref IDT: InterruptDescriptorTable = {

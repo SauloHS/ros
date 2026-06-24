@@ -1,3 +1,12 @@
+/*
+ * ROS Kernel
+ *
+ * Copyright (c) 2026 Saulo Henrique Santos Dorotéio
+ *
+ * This file is part of ROS.
+ * See the LICENSE file in the project root for licensing information.
+ */
+
 pub fn init() {
     crate::gdt::init();
     crate::interrupts::init_idt();
@@ -9,4 +18,4 @@ pub fn init() {
     }
 
     x86_64::instructions::interrupts::enable();
-}
+} 
