@@ -1,0 +1,36 @@
+#!/bin/bash
+
+set -e
+
+echo "[pre-commit] Formatting..."
+
+cargo fmt
+
+AUTHOR=$(git config user.name)
+
+FILES=$(git diff --cached --name-only --diff-filter=ACM | grep '\.rs$' || true)
+
+for FILE in $FILES; do
+    if ! head -n 10 "$FILE" | grep -q "ROS Kernel"; then
+        HEADER="/*
+ * ROS Kernel
+ *
+ * Copyright (c) 2026 $AUTHOR
+ *
+ * This file is part of ROS.
+ * See the LICENSE file in the project root for licensing information.
+ */
+
+"
+
+        tmp=$(mktemp)
+
+        {
+            printf "%s" "$HEADER"
+            cat "$FILE"
+        } > "$tmp"
+
+        mv "$tmp" "$FILE"
+        git add "$FILE"
+    fi
+done

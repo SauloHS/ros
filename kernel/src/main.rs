@@ -18,6 +18,7 @@ mod interrupts;
 
 use bootloader_api::{BootInfo, entry_point};
 use core::panic::PanicInfo;
+use crate::init::{init, hlt_loop};
 
 entry_point!(kernel_main);
 
@@ -27,18 +28,15 @@ fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
         let buffer = framebuffer.buffer_mut();
         drivers::video::framebuffer::init(buffer, info);
     }
-    init::init();
+    init();
 
     println!("ROS");
 
-    loop {
-        use crate::print;
-        print!("-")
-    }
+    hlt_loop();
 }
 
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
     println!("{}", info);
-    loop {}
+    hlt_loop();
 }
