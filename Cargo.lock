@@ -237,6 +237,7 @@ dependencies = [
  "conquer-once",
  "lazy_static",
  "noto-sans-mono-bitmap",
+ "pc-keyboard",
  "pic8259",
  "spin",
  "spinning_top",
@@ -315,6 +316,12 @@ name = "once_cell"
 version = "1.21.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9f7c3e4beb33f85d45ae3e3a1792185706c8e16d043238c593331cc7cd313b50"
+
+[[package]]
+name = "pc-keyboard"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ed089a1fbffe3337a1a345501c981f1eb1e47e69de5a40e852433e12953c3174"
 
 [[package]]
 name = "pic8259"

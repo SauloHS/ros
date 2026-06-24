@@ -16,9 +16,9 @@ mod gdt;
 mod init;
 mod interrupts;
 
+use crate::init::{hlt_loop, init};
 use bootloader_api::{BootInfo, entry_point};
 use core::panic::PanicInfo;
-use crate::init::{init, hlt_loop};
 
 entry_point!(kernel_main);
 
