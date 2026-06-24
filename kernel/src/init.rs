@@ -10,6 +10,8 @@
 pub fn init() {
     crate::gdt::init();
     crate::interrupts::init_idt();
+    use x86_64::instructions::segmentation::{SS, Segment};
+    crate::println!("(DEBUG) Current SS: {:?}", SS::get_reg());
     unsafe { crate::interrupts::PICS.lock().initialize() };
     unsafe {
         let mut pics = crate::interrupts::PICS.lock();
@@ -18,4 +20,4 @@ pub fn init() {
     }
 
     x86_64::instructions::interrupts::enable();
-} 
+}

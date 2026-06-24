@@ -7,10 +7,10 @@
  * See the LICENSE file in the project root for licensing information.
  */
 
-use x86_64::VirtAddr;
-use x86_64::structures::tss::TaskStateSegment;
-use x86_64::structures::gdt::{GlobalDescriptorTable, Descriptor, SegmentSelector};
 use lazy_static::lazy_static;
+use x86_64::VirtAddr;
+use x86_64::structures::gdt::{Descriptor, GlobalDescriptorTable, SegmentSelector};
+use x86_64::structures::tss::TaskStateSegment;
 
 pub const DOUBLE_FAULT_IST_INDEX: u16 = 0;
 
@@ -23,7 +23,7 @@ lazy_static! {
 
             let stack_start = VirtAddr::from_ptr(&raw const STACK);
             let stack_end = stack_start + STACK_SIZE as u64;
-            stack_end 
+            stack_end
         };
         tss
     };
@@ -35,19 +35,26 @@ lazy_static! {
         let code_selector = gdt.append(Descriptor::kernel_code_segment());
         let data_selector = gdt.append(Descriptor::kernel_data_segment());
         let tss_selector = gdt.append(Descriptor::tss_segment(&TSS));
-        (gdt, Selectors { code_selector, data_selector, tss_selector }) 
+        (
+            gdt,
+            Selectors {
+                code_selector,
+                data_selector,
+                tss_selector,
+            },
+        )
     };
 }
 
 struct Selectors {
     code_selector: SegmentSelector,
-    data_selector: SegmentSelector, 
+    data_selector: SegmentSelector,
     tss_selector: SegmentSelector,
 }
 
 pub fn init() {
+    use x86_64::instructions::segmentation::{CS, SS, Segment};
     use x86_64::instructions::tables::load_tss;
-    use x86_64::instructions::segmentation::{CS, SS, Segment}; 
 
     GDT.0.load();
     unsafe {

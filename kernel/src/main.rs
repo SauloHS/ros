@@ -12,11 +12,11 @@
 #![feature(abi_x86_interrupt)]
 
 mod drivers;
-mod interrupts;
-mod init;
 mod gdt;
+mod init;
+mod interrupts;
 
-use bootloader_api::{entry_point, BootInfo};
+use bootloader_api::{BootInfo, entry_point};
 use core::panic::PanicInfo;
 
 entry_point!(kernel_main);
@@ -28,14 +28,17 @@ fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
         drivers::video::framebuffer::init(buffer, info);
     }
     init::init();
-    
+
     println!("ROS");
 
-    loop {} 
+    loop {
+        use crate::print;
+        print!("-")
+    }
 }
 
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
     println!("{}", info);
     loop {}
-} 
+}

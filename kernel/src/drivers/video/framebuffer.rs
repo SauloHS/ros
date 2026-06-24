@@ -8,9 +8,11 @@
  */
 
 use bootloader_api::info::{FrameBufferInfo, PixelFormat};
-use core::fmt;
-use noto_sans_mono_bitmap::{get_raster, get_raster_width, FontWeight, RasterHeight, RasterizedChar};
 use conquer_once::spin::OnceCell;
+use core::fmt;
+use noto_sans_mono_bitmap::{
+    FontWeight, RasterHeight, RasterizedChar, get_raster, get_raster_width,
+};
 use spinning_top::Spinlock;
 
 pub static WRITER: OnceCell<Spinlock<Writer>> = OnceCell::uninit();
@@ -21,7 +23,7 @@ const LINE_SPACING: usize = 2;
 const LETTER_SPACING: usize = 0;
 const BORDER_PADDING: usize = 1;
 
-fn get_char_raster(c: char) -> RasterizedChar { 
+fn get_char_raster(c: char) -> RasterizedChar {
     fn get(c: char) -> Option<RasterizedChar> {
         get_raster(c, FONT_WEIGHT, CHAR_RASTER_HEIGHT)
     }
@@ -47,7 +49,11 @@ macro_rules! println {
 #[doc(hidden)]
 pub fn _print(args: fmt::Arguments) {
     use core::fmt::Write;
-    WRITER.get().unwrap().lock().write_fmt(args).unwrap();
+    use x86_64::instructions::interrupts;
+
+    interrupts::without_interrupts(|| {
+        WRITER.get().unwrap().lock().write_fmt(args).unwrap();
+    });
 }
 
 pub struct Writer {
@@ -127,7 +133,7 @@ impl Writer {
             }
         }
     }
-} 
+}
 
 impl fmt::Write for Writer {
     fn write_str(&mut self, s: &str) -> fmt::Result {

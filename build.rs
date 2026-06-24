@@ -1,4 +1,13 @@
 /*
+ * ROS Kernel
+ *
+ * Copyright (c) 2026 Saulo Henrique Santos Dorotéio
+ *
+ * This file is part of ROS.
+ * See the LICENSE file in the project root for licensing information.
+ */
+
+/*
 File created by Saulo Henrique Santos Dorotéio.
 Last updated by Saulo Henrique Santos Dorotéio, at 06/22/2026.
 See LICENSE file for licensing information */
@@ -16,4 +25,4 @@ fn main() {
         .unwrap();
 
     println!("cargo:rustc-env=BIOS_PATH={}", bios_path.display());
-} 
+}

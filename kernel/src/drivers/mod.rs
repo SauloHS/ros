@@ -7,4 +7,4 @@
  * See the LICENSE file in the project root for licensing information.
  */
 
-pub mod video; 
+pub mod video;
