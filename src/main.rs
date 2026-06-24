@@ -1,3 +1,12 @@
+/*
+ * ROS Kernel
+ *
+ * Copyright (c) 2026 Saulo Henrique Santos Dorotéio
+ *
+ * This file is part of ROS.
+ * See the LICENSE file in the project root for licensing information.
+ */
+
 fn main() {
     let bios_path = env!("BIOS_PATH");
 
@@ -15,4 +24,4 @@ fn main() {
 
     let status = cmd.status().unwrap();
     std::process::exit(status.code().unwrap_or(-1));
-}
+} 
