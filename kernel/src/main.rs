@@ -18,14 +18,17 @@ mod interrupts;
 mod memory;
 
 use crate::init::{hlt_loop, init};
-use crate::memory::active_level_4_table;
 use bootloader_api::{
     BootInfo,
     config::{BootloaderConfig, Mapping},
     entry_point,
 };
 use core::panic::PanicInfo;
-use x86_64::VirtAddr;
+use x86_64::{
+    VirtAddr,
+    structures::paging::Page
+};
+use memory::BootInfoFrameAllocator;
 
 pub static BOOTLOADER_CONFIG: BootloaderConfig = {
     let mut config = BootloaderConfig::new_default();
@@ -50,13 +53,15 @@ fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
             .into_option()
             .expect("physical memory offset missing"),
     );
-    let l4_table = unsafe { active_level_4_table(phys_mem_offset) };
-
-    for (i, entry) in l4_table.iter().enumerate() {
-        use x86_64::structures::paging::PageTable;
-        if !entry.is_unused() {
-            println!("L4 Entry {}: {:?}", i, entry);
-        }
+    let mut mapper = unsafe { memory::init(phys_mem_offset) };
+    let mut frame_allocator = unsafe { BootInfoFrameAllocator::init(&boot_info.memory_regions) };
+    let page = Page::containing_address(VirtAddr::new(0x4444_4444_0000));
+    memory::create_example_mapping(page, &mut mapper, &mut frame_allocator);
+    let ptr: *mut u64 = page.start_address().as_mut_ptr();
+    unsafe {
+        ptr.write_volatile(0xCAFEBABECAFED00D);
+        let value = ptr.read_volatile();
+        println!("Value = {:#x}", value)
     }
 
     hlt_loop();
