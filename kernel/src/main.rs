@@ -19,9 +19,9 @@ mod gdt;
 mod init;
 mod interrupts;
 mod memory;
+mod task;
 
 use crate::init::{hlt_loop, init};
-use alloc::{boxed::Box, rc::Rc, vec, vec::Vec};
 use bootloader_api::{
     BootInfo,
     config::{BootloaderConfig, Mapping},
@@ -29,6 +29,7 @@ use bootloader_api::{
 };
 use core::panic::PanicInfo;
 use memory::BootInfoFrameAllocator;
+use task::{Task, executor::Executor, keyboard};
 use x86_64::VirtAddr;
 
 pub static BOOTLOADER_CONFIG: BootloaderConfig = {
@@ -46,7 +47,6 @@ fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
         drivers::video::framebuffer::init(buffer, info);
     }
     init();
-    println!("ROS");
 
     let phys_mem_offset = VirtAddr::new(
         boot_info
@@ -59,28 +59,9 @@ fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
 
     allocator::init_heap(&mut mapper, &mut frame_allocator).expect("heap initialization failed");
 
-    let heap_value = Box::new(41);
-    println!("heap_value at {:p}", heap_value);
-
-    let mut vec = Vec::new();
-    for i in 0..500 {
-        vec.push(i);
-    }
-    println!("vec at {:p}", vec.as_slice());
-
-    let reference_counted = Rc::new(vec![1, 2, 3]);
-    let cloned_reference = reference_counted.clone();
-    println!(
-        "current reference count is {}",
-        Rc::strong_count(&cloned_reference)
-    );
-    core::mem::drop(reference_counted);
-    println!(
-        "reference count is {} now",
-        Rc::strong_count(&cloned_reference)
-    );
-
-    hlt_loop();
+    let mut executor = Executor::new();
+    executor.spawn(Task::new(keyboard::print_keypresses()));
+    executor.run();
 }
 
 #[panic_handler]
