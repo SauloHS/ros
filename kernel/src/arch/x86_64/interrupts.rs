@@ -9,7 +9,6 @@
 
 use crate::arch::x86_64::gdt;
 use crate::arch::x86_64::init::hlt_loop;
-use crate::arch::x86_64::syscall;
 use crate::println;
 use lazy_static::lazy_static;
 use pic8259::ChainedPics;
@@ -38,14 +37,6 @@ lazy_static! {
         idt.page_fault.set_handler_fn(page_fault_handler);
         idt.general_protection_fault
             .set_handler_fn(gp_fault_handler);
-        {
-            let addr = VirtAddr::new(syscall::int_0x80_handler_frame as *const () as u64);
-            unsafe {
-                idt[0x80]
-                    .set_handler_addr(addr)
-                    .set_privilege_level(x86_64::PrivilegeLevel::Ring3);
-            }
-        }
         idt
     };
 }

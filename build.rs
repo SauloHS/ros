@@ -38,11 +38,13 @@ fn main() {
             "-o",
         ])
         .arg(&init_elf)
-        .args(["init.c", "-Wl,-Ttext-segment=0x400000"])
+        .args(["init.c", "libros.c", "-Wl,-Ttext-segment=0x400000"])
         .status()
         .expect("failed to compile init.c");
     assert!(status.success(), "gcc compilation of init.c failed");
 
     println!("cargo:rerun-if-changed=init.c");
+    println!("cargo:rerun-if-changed=libros.c");
+    println!("cargo:rerun-if-changed=libros.h");
     println!("cargo:rustc-env=INIT_ELF_PATH={}", init_elf.display());
 }

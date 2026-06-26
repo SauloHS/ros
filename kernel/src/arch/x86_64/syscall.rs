@@ -30,8 +30,11 @@ struct SyscallRegs {
 
 #[unsafe(naked)]
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn int_0x80_handler_frame() {
+pub unsafe extern "C" fn syscall_entry() {
     naked_asm!(
+        "swapgs",
+        "mov gs:0, rsp",
+        "mov rsp, gs:8",
         "push rax",
         "push rcx",
         "push rdx",
@@ -64,7 +67,9 @@ pub unsafe extern "C" fn int_0x80_handler_frame() {
         "pop rdx",
         "pop rcx",
         "pop rax",
-        "iretq",
+        "mov rsp, gs:0",
+        "swapgs",
+        "sysretq",
         handler = sym handle_syscall,
     )
 }
@@ -79,8 +84,8 @@ extern "C" fn handle_syscall(regs: &mut SyscallRegs) {
             regs.rax = sys_write(fd, buf, len) as u64;
         }
         60 => {
-            let code = regs.rdi;
-            sys_exit(code);
+            let _code = regs.rdi;
+            sys_exit();
         }
         _ => {
             regs.rax = !0;
@@ -93,7 +98,6 @@ fn sys_write(fd: u64, buf: *const u8, len: usize) -> i64 {
         return -1;
     }
     let slice = unsafe { core::slice::from_raw_parts(buf, len) };
-
     if let Ok(s) = core::str::from_utf8(slice) {
         crate::print!("{}", s);
     } else {
@@ -106,6 +110,6 @@ fn sys_write(fd: u64, buf: *const u8, len: usize) -> i64 {
     len as i64
 }
 
-fn sys_exit(_code: u64) -> ! {
+fn sys_exit() -> ! {
     crate::arch::x86_64::init::hlt_loop()
 }

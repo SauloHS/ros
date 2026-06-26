@@ -9,6 +9,7 @@
 
 pub fn init() {
     crate::arch::x86_64::gdt::init();
+    crate::arch::x86_64::gdt::init_syscall();
     crate::arch::x86_64::interrupts::init_idt();
     unsafe { crate::arch::x86_64::interrupts::PICS.lock().initialize() };
     x86_64::instructions::interrupts::enable();
