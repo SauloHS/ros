@@ -1,12 +1,3 @@
-/*
- * ROS Kernel
- *
- * Copyright (c) 2026 Saulo Henrique Santos Dorotéio
- *
- * This file is part of ROS.
- * See the LICENSE file in the project root for licensing information.
- */
-
 use bootloader_api::info::{MemoryRegionKind, MemoryRegions};
 use x86_64::{
     PhysAddr, VirtAddr,
@@ -25,7 +16,7 @@ impl BootInfoFrameAllocator {
             next: 0,
         }
     }
-    /// Returns an iterator over the usable frames specified in the memory map.
+
     fn usable_frames(&self) -> impl Iterator<Item = PhysFrame> {
         let regions = self.memory_regions.iter();
         let usable_regions = regions.filter(|r| r.kind == MemoryRegionKind::Usable);
@@ -51,7 +42,6 @@ pub unsafe fn init(physical_memory_offset: VirtAddr) -> OffsetPageTable<'static>
     }
 }
 
-/// Returns a mutable reference to the active level 4 table
 unsafe fn active_level_4_table(physical_memory_offset: VirtAddr) -> &'static mut PageTable {
     use x86_64::registers::control::Cr3;
     let (level_4_table_frame, _) = Cr3::read();
@@ -63,8 +53,6 @@ unsafe fn active_level_4_table(physical_memory_offset: VirtAddr) -> &'static mut
     unsafe { &mut *page_table_ptr }
 }
 
-/// Translates the given virtual address to the mapped physical address, or
-/// `None` if the address is not mapped
 pub unsafe fn _translate_addr(
     addr: VirtAddr,
     physical_memory_offset: VirtAddr,
@@ -86,14 +74,11 @@ fn _translate_addr_inner(addr: VirtAddr, physical_memory_offset: VirtAddr) -> Op
     ];
     let mut frame = level_4_table_frame;
 
-    // traverse the multi-level page table
     for &index in &table_indexes {
-        // convert the frame into a page table reference
         let virt = physical_memory_offset + frame.start_address().as_u64();
         let table_ptr: *const PageTable = virt.as_ptr();
         let table = unsafe { &*table_ptr };
 
-        // read the page table entry and update `frame`
         let entry = &table[index];
         frame = match entry.frame() {
             Ok(frame) => frame,

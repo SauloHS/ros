@@ -1,14 +1,5 @@
-/*
- * ROS Kernel
- *
- * Copyright (c) 2026 Saulo Henrique Santos Dorotéio
- *
- * This file is part of ROS.
- * See the LICENSE file in the project root for licensing information.
- */
-
-use crate::gdt;
-use crate::hlt_loop;
+use crate::arch::x86_64::gdt;
+use crate::arch::x86_64::init::hlt_loop;
 use crate::println;
 use lazy_static::lazy_static;
 use pic8259::ChainedPics;
@@ -49,10 +40,6 @@ impl InterruptIndex {
     fn as_u8(self) -> u8 {
         self as u8
     }
-
-    /*  fn as_usize(self) -> usize {
-        usize::from(self.as_u8())
-    }*/
 }
 
 pub fn init_idt() {
@@ -82,7 +69,7 @@ extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: InterruptStac
 
     let mut port = Port::new(0x60);
     let scancode: u8 = unsafe { port.read() };
-    crate::task::keyboard::add_scancode(scancode);
+    crate::drivers::keyboard::add_scancode(scancode);
 
     unsafe {
         PICS.lock()

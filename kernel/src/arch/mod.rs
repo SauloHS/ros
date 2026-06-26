@@ -7,5 +7,4 @@
  * See the LICENSE file in the project root for licensing information.
  */
 
-pub mod keyboard;
-pub mod video;
+pub mod x86_64;

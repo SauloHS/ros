@@ -7,5 +7,7 @@
  * See the LICENSE file in the project root for licensing information.
  */
 
-pub mod keyboard;
-pub mod video;
+pub mod gdt;
+pub mod init;
+pub mod interrupts;
+pub mod memory;

@@ -1,12 +1,3 @@
-/*
- * ROS Kernel
- *
- * Copyright (c) 2026 Saulo Henrique Santos Dorotéio
- *
- * This file is part of ROS.
- * See the LICENSE file in the project root for licensing information.
- */
-
 use crate::{print, println};
 use conquer_once::spin::OnceCell;
 use core::{
@@ -23,9 +14,6 @@ use pc_keyboard::{DecodedKey, HandleControl, Keyboard, ScancodeSet1, layouts};
 static SCANCODE_QUEUE: OnceCell<ArrayQueue<u8>> = OnceCell::uninit();
 static WAKER: AtomicWaker = AtomicWaker::new();
 
-/// Called by the keyboard interrupt handler
-///
-/// Must not block or allocate.
 pub(crate) fn add_scancode(scancode: u8) {
     if let Ok(queue) = SCANCODE_QUEUE.try_get() {
         if let Err(_) = queue.push(scancode) {
@@ -59,7 +47,6 @@ impl Stream for ScancodeStream {
             .try_get()
             .expect("scancode queue not initialized");
 
-        // fast path
         if let Some(scancode) = queue.pop() {
             return Poll::Ready(Some(scancode));
         }

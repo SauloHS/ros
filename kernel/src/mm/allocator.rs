@@ -1,18 +1,9 @@
-/*
- * ROS Kernel
- *
- * Copyright (c) 2026 Saulo Henrique Santos Dorotéio
- *
- * This file is part of ROS.
- * See the LICENSE file in the project root for licensing information.
- */
-
 pub mod fixed_size_block;
 
 pub const HEAP_START: usize = 0x_4444_4444_0000;
 pub const HEAP_SIZE: usize = 100 * 1024;
 
-use fixed_size_block::FixedSizeBlockAllocator;
+use self::fixed_size_block::FixedSizeBlockAllocator;
 use x86_64::{
     VirtAddr,
     structures::paging::{

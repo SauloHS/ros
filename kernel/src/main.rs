@@ -13,23 +13,21 @@
 
 extern crate alloc;
 
-mod allocator;
+mod arch;
 mod drivers;
-mod gdt;
-mod init;
-mod interrupts;
-mod memory;
-mod task;
+mod mm;
+mod sched;
 
-use crate::init::{hlt_loop, init};
+use crate::arch::x86_64::init::{hlt_loop, init};
+use crate::arch::x86_64::memory::BootInfoFrameAllocator;
+use crate::drivers::keyboard;
+use crate::sched::{Task, executor::Executor};
 use bootloader_api::{
     BootInfo,
     config::{BootloaderConfig, Mapping},
     entry_point,
 };
 use core::panic::PanicInfo;
-use memory::BootInfoFrameAllocator;
-use task::{Task, executor::Executor, keyboard};
 use x86_64::VirtAddr;
 
 pub static BOOTLOADER_CONFIG: BootloaderConfig = {
@@ -54,10 +52,11 @@ fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
             .into_option()
             .expect("physical memory offset missing"),
     );
-    let mut mapper = unsafe { memory::init(phys_mem_offset) };
+    let mut mapper = unsafe { arch::x86_64::memory::init(phys_mem_offset) };
     let mut frame_allocator = unsafe { BootInfoFrameAllocator::init(&boot_info.memory_regions) };
 
-    allocator::init_heap(&mut mapper, &mut frame_allocator).expect("heap initialization failed");
+    mm::allocator::init_heap(&mut mapper, &mut frame_allocator)
+        .expect("heap initialization failed");
 
     let mut executor = Executor::new();
     executor.spawn(Task::new(keyboard::print_keypresses()));
@@ -67,5 +66,5 @@ fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
     println!("{}", info);
-    hlt_loop();
+    hlt_loop()
 }
