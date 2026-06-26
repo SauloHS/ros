@@ -1,9 +1,20 @@
+/*
+ * ROS Kernel
+ *
+ * Copyright (c) 2026 Saulo Henrique Santos Dorotéio
+ *
+ * This file is part of ROS.
+ * See the LICENSE file in the project root for licensing information.
+ */
+
 use crate::arch::x86_64::gdt;
 use crate::arch::x86_64::init::hlt_loop;
+use crate::arch::x86_64::syscall;
 use crate::println;
 use lazy_static::lazy_static;
 use pic8259::ChainedPics;
 use spin::Mutex;
+use x86_64::VirtAddr;
 use x86_64::structures::idt::InterruptDescriptorTable;
 use x86_64::structures::idt::InterruptStackFrame;
 use x86_64::structures::idt::PageFaultErrorCode;
@@ -25,6 +36,16 @@ lazy_static! {
         idt[InterruptIndex::Timer.as_u8()].set_handler_fn(timer_interrupt_handler);
         idt[InterruptIndex::Keyboard.as_u8()].set_handler_fn(keyboard_interrupt_handler);
         idt.page_fault.set_handler_fn(page_fault_handler);
+        idt.general_protection_fault
+            .set_handler_fn(gp_fault_handler);
+        {
+            let addr = VirtAddr::new(syscall::int_0x80_handler_frame as *const () as u64);
+            unsafe {
+                idt[0x80]
+                    .set_handler_addr(addr)
+                    .set_privilege_level(x86_64::PrivilegeLevel::Ring3);
+            }
+        }
         idt
     };
 }
@@ -77,14 +98,25 @@ extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: InterruptStac
     }
 }
 
+extern "x86-interrupt" fn gp_fault_handler(stack_frame: InterruptStackFrame, error_code: u64) {
+    println!("!!! GENERAL PROTECTION FAULT !!!");
+    println!("error_code: 0x{:x}", error_code);
+    println!("rip: 0x{:x}", stack_frame.instruction_pointer.as_u64());
+    println!("cs: 0x{:x}", stack_frame.code_segment.0 as u64);
+    println!("rflags: 0x{:x}", stack_frame.cpu_flags.bits());
+    println!("rsp: 0x{:x}", stack_frame.stack_pointer.as_u64());
+    println!("ss: 0x{:x}", stack_frame.stack_segment.0 as u64);
+    hlt_loop();
+}
+
 extern "x86-interrupt" fn page_fault_handler(
     stack_frame: InterruptStackFrame,
     error_code: PageFaultErrorCode,
 ) {
     use x86_64::registers::control::Cr2;
-    println!("EXCEPTION: PAGE FAULT");
-    println!("Accessed Address: {:?}", Cr2::read());
-    println!("Error Code: {:?}", error_code);
-    println!("{:#?}", stack_frame);
+    println!("!!! PAGE FAULT !!!");
+    println!("Accessed Address: 0x{:x}", Cr2::read_raw());
+    println!("Error Code: 0x{:x}", error_code.bits());
+    println!("RIP: 0x{:x}", stack_frame.instruction_pointer.as_u64());
     hlt_loop();
 }

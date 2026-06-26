@@ -52,10 +52,10 @@ To run and open QEMU, run `cargo run`. To build only, without opening QEMU, run 
 
 Project tree
 ============
-src/main.rs                        # Runs QEMU
+src/main.rs                        # Runs QEMU; creates FAT32 disk image
 kernel/
 ├── src/
-│   ├── main.rs                    # Kernel entry point
+│   ├── main.rs                    # Kernel entry point; disk/FAT32 test
 │   ├── lib.rs                     # Kernel library root
 │   ├── arch/
 │   │   └── x86_64/
@@ -73,7 +73,13 @@ kernel/
 │   ├── drivers/
 │   │   ├── mod.rs
 │   │   ├── keyboard.rs            # PS/2 keyboard driver
-│   │   └── video.rs               # Framebuffer / VGA
+│   │   ├── video/
+│   │   │   ├── mod.rs
+│   │   │   └── framebuffer.rs     # Framebuffer text console
+│   │   └── disk/
+│   │       ├── mod.rs
+│   │       ├── ata.rs             # ATA PIO LBA28 disk driver
+│   │       └── fat32.rs           # FAT32 read-only filesystem driver
 │   └── sched/
 │       ├── mod.rs                 # Task, TaskId
 │       └── executor.rs            # Async executor

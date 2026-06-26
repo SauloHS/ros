@@ -7,5 +7,7 @@
  * See the LICENSE file in the project root for licensing information.
  */
 
+pub mod disk;
 pub mod keyboard;
+pub mod serial;
 pub mod video;
