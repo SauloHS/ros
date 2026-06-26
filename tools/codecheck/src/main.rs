@@ -239,8 +239,7 @@ fn long_functions(c: &str, issues: &mut Vec<Issue>) {
             if semi.is_some_and(|s| brace.map_or(true, |b| b > s)) { continue; }
             if let Some(_) = brace {
                 fn_start = Some((i + 1, t.split('(').next().unwrap_or(t).trim().to_string()));
-                brace_depth = 1;
-                brace_depth += t.matches('{').count() as i32 - t.matches('}').count() as i32;
+                brace_depth = t.matches('{').count() as i32 - t.matches('}').count() as i32;
                 if brace_depth == 0 { fn_start = None; }
             }
         }
