@@ -22,9 +22,17 @@ Make sure to add a "How to replicate" section, and list what you've tried.
 
 Pull requests
 -------------
-We accept pull requests. 
+We accept pull requests.
 When committing your changes into your PR branch, make sure to add a Signed-off-by.
 Pull requests are going to be reviewed, and possibly, merged.
+
+Before opening a PR, run the code quality checker on your changes:
+
+  ./codecheck $(git diff --name-only --diff-filter=ACMR origin/main...HEAD)
+
+Or scan all kernel files:
+
+  ./checkcode
 
 Development
 ===========
@@ -44,15 +52,36 @@ To run and open QEMU, run `cargo run`. To build only, without opening QEMU, run 
 
 Project tree
 ============
-src/main.rs                  # Runs QEMU
+src/main.rs                        # Runs QEMU
 kernel/
 ├── src/
-│   ├── main.rs              # Kernel entry point
-│   ├── arch/x86_64/         # Architecture-specific (GDT, IDT, paging, init)
-│   ├── mm/                  # Memory management (allocator)
-│   ├── drivers/             # Hardware drivers (video, keyboard)
-│   └── sched/               # Scheduling (async executor, tasks)
-tools/codecheck/             # Code quality checker
+│   ├── main.rs                    # Kernel entry point
+│   ├── lib.rs                     # Kernel library root
+│   ├── arch/
+│   │   └── x86_64/
+│   │       ├── mod.rs
+│   │       ├── gdt.rs             # Global Descriptor Table
+│   │       ├── interrupts.rs      # IDT and interrupt handling
+│   │       ├── memory.rs          # Page table initialization
+│   │       └── init.rs            # Architecture bring-up
+│   ├── mm/
+│   │   ├── mod.rs
+│   │   ├── allocator/
+│   │   │   ├── mod.rs
+│   │   │   └── fixed_size_block.rs
+│   │   └── allocator.rs
+│   ├── drivers/
+│   │   ├── mod.rs
+│   │   ├── keyboard.rs            # PS/2 keyboard driver
+│   │   └── video.rs               # Framebuffer / VGA
+│   └── sched/
+│       ├── mod.rs                 # Task, TaskId
+│       └── executor.rs            # Async executor
+tools/
+└── codecheck/
+    ├── Cargo.toml                 # Standalone workspace
+    ├── src/
+    │   └── main.rs                # Scanner + ratatui TUI
+    └── target/release/codecheck   # Pre-built binary
 
 Last edited by Saulo Henrique at June 26th, 2026.
-

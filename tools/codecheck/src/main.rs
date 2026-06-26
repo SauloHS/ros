@@ -337,8 +337,14 @@ fn sev_label(s: &Severity) -> &'static str {
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("..").join("..");
-    let mut rs_files = walk_rs_files(&root);
-    rs_files.retain(|p| p.strip_prefix(&root).map(|r| r.to_string_lossy().starts_with("kernel")).unwrap_or(false));
+    let args: Vec<String> = std::env::args().collect();
+    let rs_files: Vec<std::path::PathBuf> = if args.len() > 1 {
+        args[1..].iter().map(|a| root.join(a)).collect()
+    } else {
+        let mut files = walk_rs_files(&root);
+        files.retain(|p| p.strip_prefix(&root).map(|r| r.to_string_lossy().starts_with("kernel")).unwrap_or(false));
+        files
+    };
     let mut reports: Vec<FileReport> = Vec::new();
     let dead = dead_code(&rs_files, &root);
     let dup = duplicate_code(&rs_files, &root);
