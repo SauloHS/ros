@@ -339,7 +339,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("..").join("..");
     let args: Vec<String> = std::env::args().collect();
     let rs_files: Vec<std::path::PathBuf> = if args.len() > 1 {
-        args[1..].iter().map(|a| root.join(a)).collect()
+        args[1..].iter().filter(|a| a.ends_with(".rs")).map(|a| root.join(a)).collect()
     } else {
         let mut files = walk_rs_files(&root);
         files.retain(|p| p.strip_prefix(&root).map(|r| r.to_string_lossy().starts_with("kernel")).unwrap_or(false));
