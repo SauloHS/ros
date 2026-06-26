@@ -74,9 +74,9 @@ fn try_run_init(
 
     Drive::disable_interrupts();
 
-    let mut drive = Drive::new_master();
+    let mut drive = Drive::new_slave();
     if !matches!(drive.probe(), DeviceType::Ata) {
-        drive = Drive::new_slave();
+        drive = Drive::new_master();
         if !matches!(drive.probe(), DeviceType::Ata) {
             return Err("no ATA drive found");
         }
