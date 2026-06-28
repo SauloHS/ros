@@ -8,6 +8,7 @@
  */
 
 pub fn init() {
+    crate::drivers::serial::SERIAL1.lock().init();
     crate::arch::x86_64::gdt::init();
     crate::arch::x86_64::gdt::init_syscall();
     crate::arch::x86_64::interrupts::init_idt();

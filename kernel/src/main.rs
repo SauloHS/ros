@@ -36,6 +36,8 @@ pub static BOOTLOADER_CONFIG: BootloaderConfig = {
     config
 };
 
+static INIT_ELF: &[u8] = include_bytes!(env!("INIT_ELF_PATH"));
+
 entry_point!(kernel_main, config = &BOOTLOADER_CONFIG);
 
 fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
@@ -69,31 +71,7 @@ fn try_run_init(
     mapper: &mut impl Mapper<Size4KiB>,
     frame_allocator: &mut impl FrameAllocator<Size4KiB>,
 ) -> Result<(), &'static str> {
-    use crate::drivers::disk::ata::{DeviceType, Drive};
-    use crate::drivers::disk::fat32::Fat32;
-
-    Drive::disable_interrupts();
-
-    let mut drive = Drive::new_slave();
-    if !matches!(drive.probe(), DeviceType::Ata) {
-        drive = Drive::new_master();
-        if !matches!(drive.probe(), DeviceType::Ata) {
-            return Err("no ATA drive found");
-        }
-    }
-
-    let mut fs = Fat32::new(drive).map_err(|_| "FAT32 mount failed")?;
-    let entries = fs.root_entries().map_err(|_| "root dir read failed")?;
-
-    let elf_name = entries
-        .iter()
-        .find(|e| !e.is_dir && (e.name == "INIT.ELF" || e.name == "init.elf"))
-        .ok_or("INIT.ELF not found")?
-        .name
-        .clone();
-
-    let elf_data = fs.open_file(&elf_name).map_err(|_| "open file failed")?;
-    let entry = elf::load_elf(&elf_data, mapper, frame_allocator).map_err(|_| "ELF load failed")?;
+    let entry = elf::load_elf(INIT_ELF, mapper, frame_allocator)?;
 
     let user_stack_bottom = VirtAddr::new(0x7FFFFF0000);
     let user_stack_size: u64 = 64 * 1024;

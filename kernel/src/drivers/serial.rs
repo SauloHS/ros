@@ -70,7 +70,11 @@ impl fmt::Write for SerialPort {
                     self.write_byte(b'\r');
                     self.write_byte(b'\n');
                 }
-                b'\x7F' => {}
+                b'\x08' | b'\x7f' => {
+                    self.write_byte(b'\x08');
+                    self.write_byte(b' ');
+                    self.write_byte(b'\x08');
+                }
                 _ => {
                     self.write_byte(b);
                 }

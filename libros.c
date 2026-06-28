@@ -1,3 +1,14 @@
+int read(int fd, char *buf, int len) {
+    int ret;
+    __asm__ volatile (
+        "syscall"
+        : "=a" (ret)
+        : "a" (0), "D" (fd), "S" (buf), "d" (len)
+        : "rcx", "r11", "memory"
+    );
+    return ret;
+}
+
 int write(int fd, const char *buf, int len) {
     int ret;
     __asm__ volatile (

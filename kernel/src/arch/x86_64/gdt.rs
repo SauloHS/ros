@@ -97,13 +97,15 @@ pub fn init_syscall() {
         core::arch::asm!("rdmsr", in("ecx") 0xC0000080u32, out("eax") efer_lo, out("edx") efer_hi);
         let efer = (efer_hi as u64) << 32 | efer_lo as u64;
         let efer = efer | 1; // set SCE bit
-        core::arch::asm!("wrmsr", in("ecx") 0xC0000080u32, in("eax") efer as u32, in("edx") (efer >> 32) as u32);
+        core::arch::asm!("wrmsr", in("ecx") 0xC0000080u32, in("eax") efer as u32,
+            in("edx") (efer >> 32) as u32);
 
         // Set KernelGSBase (MSR 0xC0000102) to point to SYSCALL_STACK.
         // swapgs exchanges GS.base with this MSR, so the kernel can access
         // the per-CPU area via gs: after the first swapgs.
         let gs_base = core::ptr::addr_of!(SYSCALL_STACK) as u64;
-        core::arch::asm!("wrmsr", in("ecx") 0xC0000102u32, in("eax") gs_base as u32, in("edx") (gs_base >> 32) as u32);
+        core::arch::asm!("wrmsr", in("ecx") 0xC0000102u32, in("eax") gs_base as u32,
+            in("edx") (gs_base >> 32) as u32);
 
         // STAR MSR (0xC0000081):
         //   bits 47:32 = kernel CS = 0x08 (code_selector)
@@ -113,15 +115,18 @@ pub fn init_syscall() {
         let user_cs_selector = selectors().user_code_selector.0 & 0xFFF8;
         let star_val =
             ((user_cs_selector as u64 - 16) << 48) | ((selectors().code_selector.0 as u64) << 32);
-        core::arch::asm!("wrmsr", in("ecx") 0xC0000081u32, in("eax") star_val as u32, in("edx") (star_val >> 32) as u32);
+        core::arch::asm!("wrmsr", in("ecx") 0xC0000081u32, in("eax") star_val as u32,
+            in("edx") (star_val >> 32) as u32);
 
         // LSTAR MSR (0xC0000082): handler address
         let handler = crate::arch::x86_64::syscall::syscall_entry as *const () as u64;
-        core::arch::asm!("wrmsr", in("ecx") 0xC0000082u32, in("eax") handler as u32, in("edx") (handler >> 32) as u32);
+        core::arch::asm!("wrmsr", in("ecx") 0xC0000082u32, in("eax") handler as u32,
+            in("edx") (handler >> 32) as u32);
 
         // SF_MASK MSR (0xC0000084): clear IF (bit 9) on syscall entry
         let mask: u64 = 0x200;
-        core::arch::asm!("wrmsr", in("ecx") 0xC0000084u32, in("eax") mask as u32, in("edx") (mask >> 32) as u32);
+        core::arch::asm!("wrmsr", in("ecx") 0xC0000084u32, in("eax") mask as u32,
+            in("edx") (mask >> 32) as u32);
     }
 }
 

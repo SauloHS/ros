@@ -77,6 +77,12 @@ pub unsafe extern "C" fn syscall_entry() {
 #[unsafe(no_mangle)]
 extern "C" fn handle_syscall(regs: &mut SyscallRegs) {
     match regs.rax {
+        0 => {
+            let fd = regs.rdi;
+            let buf = regs.rsi as *mut u8;
+            let len = regs.rdx as usize;
+            regs.rax = sys_read(fd, buf, len) as u64;
+        }
         1 => {
             let fd = regs.rdi;
             let buf = regs.rsi as *const u8;
@@ -90,6 +96,22 @@ extern "C" fn handle_syscall(regs: &mut SyscallRegs) {
         _ => {
             regs.rax = !0;
         }
+    }
+}
+
+fn sys_read(fd: u64, buf: *mut u8, len: usize) -> i64 {
+    if fd == 0 {
+        let slice = unsafe { core::slice::from_raw_parts_mut(buf, len) };
+        loop {
+            crate::drivers::keyboard::drain_scancodes();
+            let n = crate::drivers::keyboard::read_keybuf(slice) as i64;
+            if n > 0 {
+                return n;
+            }
+            x86_64::instructions::interrupts::enable_and_hlt();
+        }
+    } else {
+        -1
     }
 }
 

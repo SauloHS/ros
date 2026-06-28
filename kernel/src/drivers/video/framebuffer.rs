@@ -23,11 +23,8 @@ const LINE_SPACING: usize = 2;
 const LETTER_SPACING: usize = 0;
 const BORDER_PADDING: usize = 1;
 
-fn get_char_raster(c: char) -> RasterizedChar {
-    fn get(c: char) -> Option<RasterizedChar> {
-        get_raster(c, FONT_WEIGHT, CHAR_RASTER_HEIGHT)
-    }
-    get(c).unwrap_or_else(|| get('\u{fffd}').expect("deve existir o caractere de fallback"))
+fn get_char_raster(c: char) -> Option<RasterizedChar> {
+    get_raster(c, FONT_WEIGHT, CHAR_RASTER_HEIGHT)
 }
 
 pub fn init(framebuffer: &'static mut [u8], info: FrameBufferInfo) {
@@ -52,7 +49,13 @@ pub fn _print(args: fmt::Arguments) {
     use x86_64::instructions::interrupts;
 
     interrupts::without_interrupts(|| {
-        WRITER.get().unwrap().lock().write_fmt(args).unwrap();
+        if let Some(writer) = WRITER.get() {
+            writer.lock().write_fmt(args).unwrap();
+        }
+        crate::drivers::serial::SERIAL1
+            .lock()
+            .write_fmt(args)
+            .unwrap();
     });
 }
 
@@ -120,6 +123,11 @@ impl Writer {
         match c {
             '\n' => self.newline(),
             '\r' => self.carriage_return(),
+            '\x08' | '\x7f' => {
+                if self.x_pos > BORDER_PADDING {
+                    self.x_pos -= CHAR_RASTER_WIDTH + LETTER_SPACING;
+                }
+            }
             c => {
                 let new_xpos = self.x_pos + CHAR_RASTER_WIDTH;
                 if new_xpos >= self.width() {
@@ -129,7 +137,11 @@ impl Writer {
                 if new_ypos >= self.height() {
                     self.clear();
                 }
-                self.write_rendered_char(get_char_raster(c));
+                if let Some(raster) = get_char_raster(c) {
+                    self.write_rendered_char(raster);
+                } else {
+                    self.x_pos += CHAR_RASTER_WIDTH + LETTER_SPACING;
+                }
             }
         }
     }

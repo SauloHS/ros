@@ -10,8 +10,6 @@
 use std::io::{Seek, SeekFrom, Write};
 use std::path::Path;
 
-static INIT_ELF: &[u8] = include_bytes!(env!("INIT_ELF_PATH"));
-
 fn main() {
     let bios_path = env!("BIOS_PATH");
 
@@ -137,7 +135,6 @@ fn create_fat32_disk(path: &Path) -> std::io::Result<()> {
     f.write_all(&fat)?;
 
     let content = b"ROS Disk Test - FAT32 driver is working!\nHello from the kernel!\n";
-    let init_elf = INIT_ELF;
     let csize = spc as usize * ss as usize;
     let mut root = vec![0u8; csize];
 
@@ -148,20 +145,11 @@ fn create_fat32_disk(path: &Path) -> std::io::Result<()> {
     w16(&mut root, 0x14, 0);
     w32(&mut root, 0x1C, content.len() as u32);
 
-    root[32..40].copy_from_slice(b"INIT    ");
-    root[40..43].copy_from_slice(b"ELF");
-    root[32 + 0x0B] = 0x20;
-    w16(&mut root, 32 + 0x1A, 4);
-    w32(&mut root, 32 + 0x1C, init_elf.len() as u32);
-
     f.seek(SeekFrom::Start(first_data_sector * ss))?;
     f.write_all(&root)?;
 
     f.seek(SeekFrom::Start((first_data_sector + spc as u64) * ss))?;
     f.write_all(content)?;
-
-    f.seek(SeekFrom::Start((first_data_sector + 2 * spc as u64) * ss))?;
-    f.write_all(&init_elf)?;
 
     let eoc = [0xFFu8, 0xFF, 0xFF, 0x0F];
     let mut write_fat = |cluster: u32, val: &[u8; 4]| -> std::io::Result<()> {
@@ -172,29 +160,9 @@ fn create_fat32_disk(path: &Path) -> std::io::Result<()> {
         f.write_all(val)
     };
 
-    let n_readme = (content.len() + csize - 1) / csize;
-    for i in 0..n_readme {
-        let cl = 3u32 + i as u32;
-        let entry: [u8; 4] = if i == n_readme - 1 {
-            eoc
-        } else {
-            (cl + 1).to_le_bytes()
-        };
-        write_fat(cl, &entry)?;
-    }
+    write_fat(3, &eoc)?;
 
-    let n_init = (init_elf.len() + csize - 1) / csize;
-    for i in 0..n_init {
-        let cl = 4u32 + i as u32;
-        let entry: [u8; 4] = if i == n_init - 1 {
-            eoc
-        } else {
-            (cl + 1).to_le_bytes()
-        };
-        write_fat(cl, &entry)?;
-    }
-
-    w32(&mut fsinfo, 0x1E4, (total_clusters - 4) as u32);
+    w32(&mut fsinfo, 0x1E4, (total_clusters - 2) as u32);
     w32(&mut fsinfo, 0x1E8, 5);
     f.seek(SeekFrom::Start(1 * ss))?;
     f.write_all(&fsinfo)?;
